@@ -1,0 +1,78 @@
+---
+title: "Homework 9"
+author: "Mason Reed"
+date: "2024-04-18"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(mosaic)
+library(ggplot2)
+turnout = read.csv('turnout.csv')
+solder = read.csv('solder.csv')
+```
+
+
+```{r}
+prop_gotCall_voted = sum(turnout$voted1998 == 1 & turnout$GOTV_call == 1)/ sum(turnout$GOTV_call==1)
+
+prop_noCall_voted = sum(turnout$voted1998 == 1 & turnout$GOTV_call == 0)/sum(turnout$GOTV_call == 0)
+
+boot_voteProp = do(10000)*diffprop(voted1998 ~ GOTV_call, data = resample(turnout))
+voteProp_confint = confint(boot_voteProp, level=.95)
+```
+
+# 1. Get Out The Vote
+
+### Part A: Preliminary Analysis:
+The proportion of those who received the "get out the vote" call and voted in the 1998 election was `r round(prop_gotCall_voted,3)`. The proportion of those who didn't receive the call and voted was `r round(prop_noCall_voted,3)`. A 95% confidence interval for the difference in these proportions, those receiving the call and voting - those that didn't, estimates that the proportion of those who received the call and voted is about 0.140 to 0.263 more than the proportion of those who didn't get the call and voted.
+
+### Part B: Confounders 
+```{r,results = FALSE}
+prop.test(voted1998 ~ MAJORPTY, data = turnout)
+prop.test(GOTV_call ~ MAJORPTY, data = turnout)
+prop.test(GOTV_call ~ voted1996, data = turnout)
+prop.test(voted1998 ~ voted1996, data = turnout)
+```
+```{r}
+ggplot(data = turnout) + geom_boxplot(aes(x = AGE)) + facet_grid(~voted1998) + labs(title = 'Distribtion Of Ages By Voting in 1998')
+ggplot(data = turnout) + geom_boxplot(aes(x=AGE)) + facet_wrap(~GOTV_call) + labs(title = 'Distribution Of Ages By Receiving Get Out To Vote Call')
+```
+
+Age:
+The boxplots above show that those who receive the call to vote and those who voted are both slightly older than those that didn't receive the call or those who didn't vote. Since an older age seems to make it more likely to both vote in 1998 and receive the call it could be a confounding factor.
+
+Majority Party:
+Running a proportion test on the difference in proportions between those who are registered in a majority party and voted, and those who aren't and still voted, results in an estimated 0.111 to 0.153 difference in those who are registered and voted in 1998, and those who aren't and voted in 1998. This suggests that those who belong in a majority party were more likely to vote in 1998.
+
+Doing this for who received the call to vote, results in an estimated 0.0004 to 0.0129 difference between those who were registered in a majority party and received the call to vote and those who weren't registered and still received the call to vote. This suggests that those who were in a majority party were more likely to receive the call to vote.
+
+Since both voting in 1998 and receiving the call the vote appeared to be more likely for those in a majority party it has evidence to be a confounding factor.
+
+Voting In 1996:
+The difference in proportions between those who voted in 1996 while also voting in 1998, and those who didn't vote in 1996 but voted in 1998 was estimated to be between 0.393 and 0.428 higher in those who voted in 1996.
+The difference in proportions between those who voted in 1996 and receiving the GOTV call was estimated to be 0.011 and 0.022 higher in those who voted in 1996.
+Since there was a higher proportion in both cases for those who voted in 1996 there is evidence that voting in 1996 is a confounding factor.
+
+### C: Matching:
+```{r}
+
+```
+
+
+# 2. Soldering
+### A:
+```{r}
+ggplot(solder,aes(x=Opening,y=skips)) + geom_jitter() + stat_summary(fun='mean', color='darkorange')
+```
+
+The plot shows the distribution of skips for each opening solder type.
+
+https://github.com/masoncancode/hw9
+
+
