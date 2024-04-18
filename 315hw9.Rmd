@@ -66,12 +66,43 @@ Since there was a higher proportion in both cases for those who voted in 1996 th
 
 
 # 2. Soldering
-### A:
+### A: Plots
 ```{r}
 ggplot(solder,aes(x=Opening,y=skips)) + geom_jitter() + stat_summary(fun='mean', color='darkorange')
 ```
 
-The plot shows the distribution of skips for each opening solder type.
+The plot above shows the distribution of skips for each solder gun opening. The orange dot shows the mean number of skips for the corresponding opening. It appears that smaller opening leads to more skips.
+
+```{r}
+ggplot(solder, aes(x=Solder,y=skips)) + geom_jitter() + stat_summary(fun='mean', color='darkorange')
+```
+
+The plot above shows the distribution of skips for each solder type. The orange dot shows the mean number of skips for the corresponding solder type. It appears that the thin solder leads to more skips. 
+
+### B: Regression Model
+Confidence Intervals:
+```{r}
+lmSolder = lm(skips ~ Opening + Solder + Opening:Solder, data=solder)
+confint(lmSolder, level =.95)
+```
+
+Estimate Coefficents:
+```{r}
+coef(lmSolder)
+```
+### C: Interpreting Coefficients
+The baseline estimated skips is 0.393, which corresponds to a large solder gun opening with thick solder.
+The main effect of the medium opening is an increase in estimated skips by 2.4.
+The main effect of the small opening is an increase in estimated skips by 5.13.
+The main effect of the thin solder is an increase in estimated skips by 2.28.
+The interaction effect of the medium opening with thin solder is -0.74, meaning the effect of a medium opening with thin solder is 0.74 less skips than summing their main effects alone.
+The interaction effect of the small opening with the thin solder is 9.653 which means the effect of combining a small solder gun opening with the the thin solder is 9.563 more skips than their individual effects summed together.
+
+### D:
+The best combination appears to be a large opening with thick solder as the other combinations result in more expected skips than the baseline.
+
+
+
 
 https://github.com/masoncancode/hw9
 
